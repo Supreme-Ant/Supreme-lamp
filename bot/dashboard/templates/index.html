@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Bot Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Crypto Trading Bot</h1>
+        <div id="bot-status" class="status-badge">Loading...</div>
+    </header>
+
+    <main>
+        <!-- Portfolio Summary -->
+        <section class="card" id="portfolio-section">
+            <h2>Portfolio Summary</h2>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <span class="metric-label">Total Value</span>
+                    <span class="metric-value" id="total-value">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Available USDT</span>
+                    <span class="metric-value" id="available-usdt">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Daily PnL</span>
+                    <span class="metric-value" id="daily-pnl">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Total PnL</span>
+                    <span class="metric-value" id="total-pnl">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Unrealized PnL</span>
+                    <span class="metric-value" id="unrealized-pnl">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Open Positions</span>
+                    <span class="metric-value" id="num-positions">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Open Positions -->
+        <section class="card" id="positions-section">
+            <h2>Open Positions</h2>
+            <table id="positions-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Entry</th>
+                        <th>Current</th>
+                        <th>Amount</th>
+                        <th>PnL</th>
+                        <th>PnL %</th>
+                        <th>Strategy</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="positions-body">
+                    <tr><td colspan="9" class="empty">No open positions</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Strategy Status -->
+        <section class="card" id="strategies-section">
+            <h2>Strategies</h2>
+            <div class="strategies-grid" id="strategies-grid">
+                <div class="strategy-card" id="strategy-ai">
+                    <h3>AI Trading</h3>
+                    <div class="strategy-status">--</div>
+                    <button onclick="toggleStrategy('ai')">Toggle</button>
+                </div>
+                <div class="strategy-card" id="strategy-copy">
+                    <h3>Copy Trading</h3>
+                    <div class="strategy-status">--</div>
+                    <button onclick="toggleStrategy('copy')">Toggle</button>
+                </div>
+                <div class="strategy-card" id="strategy-signal">
+                    <h3>Signal Following</h3>
+                    <div class="strategy-status">--</div>
+                    <button onclick="toggleStrategy('signal')">Toggle</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Signals -->
+        <section class="card" id="signals-section">
+            <h2>Recent AI Signals</h2>
+            <table id="signals-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Action</th>
+                        <th>Confidence</th>
+                        <th>TA Score</th>
+                        <th>ML Score</th>
+                        <th>Acted On</th>
+                    </tr>
+                </thead>
+                <tbody id="signals-body">
+                    <tr><td colspan="7" class="empty">No signals yet</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Trade History -->
+        <section class="card" id="trades-section">
+            <h2>Trade History</h2>
+            <table id="trades-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Symbol</th>
+                        <th>Side</th>
+                        <th>Amount</th>
+                        <th>Price</th>
+                        <th>Cost</th>
+                        <th>PnL</th>
+                        <th>Strategy</th>
+                        <th>Mode</th>
+                    </tr>
+                </thead>
+                <tbody id="trades-body">
+                    <tr><td colspan="9" class="empty">No trades yet</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Risk Status -->
+        <section class="card" id="risk-section">
+            <h2>Risk Management</h2>
+            <div class="metrics-grid" id="risk-metrics">
+                <div class="metric">
+                    <span class="metric-label">Positions</span>
+                    <span class="metric-value" id="risk-positions">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Daily PnL</span>
+                    <span class="metric-value" id="risk-daily-pnl">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Cooldown</span>
+                    <span class="metric-value" id="risk-cooldown">--</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Peak Balance</span>
+                    <span class="metric-value" id="risk-peak">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manual Trade -->
+        <section class="card" id="manual-section">
+            <h2>Manual Trade</h2>
+            <form id="manual-trade-form" onsubmit="submitManualTrade(event)">
+                <div class="form-row">
+                    <select id="trade-symbol" required>
+                        <option value="BTC/USDT">BTC/USDT</option>
+                        <option value="ETH/USDT">ETH/USDT</option>
+                        <option value="SOL/USDT">SOL/USDT</option>
+                        <option value="BNB/USDT">BNB/USDT</option>
+                        <option value="XRP/USDT">XRP/USDT</option>
+                    </select>
+                    <select id="trade-side" required>
+                        <option value="buy">BUY</option>
+                        <option value="sell">SELL</option>
+                    </select>
+                    <input type="number" id="trade-amount" placeholder="Amount (USDT)" step="0.01" min="1" required>
+                    <button type="submit" class="btn-primary">Execute Trade</button>
+                </div>
+            </form>
+            <div id="trade-result"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Auto-refresh: <span id="refresh-countdown">15</span>s |
+        Last updated: <span id="last-update">--</span></p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
