@@ -239,6 +239,22 @@ class RiskManager:
         try:
             open_positions = session.query(Position).filter_by(is_open=True).count()
             daily_pnl = self._get_daily_pnl(session) or 0
+
+            # Calculate current drawdown
+            drawdown_pct = 0.0
+            if self._peak_balance > 0:
+                latest = (
+                    session.query(PortfolioSnapshot)
+                    .order_by(PortfolioSnapshot.timestamp.desc())
+                    .first()
+                )
+                if latest:
+                    drawdown_pct = max(
+                        0,
+                        (self._peak_balance - latest.total_balance)
+                        / self._peak_balance * 100,
+                    )
+
             return {
                 "open_positions": open_positions,
                 "max_positions": self.max_positions,
@@ -248,6 +264,7 @@ class RiskManager:
                 "consecutive_losses": self._consecutive_losses,
                 "cooldown_active": self._is_in_cooldown(),
                 "max_drawdown_pct": self.max_drawdown_pct,
+                "drawdown_pct": round(drawdown_pct, 2),
             }
         finally:
             session.close()

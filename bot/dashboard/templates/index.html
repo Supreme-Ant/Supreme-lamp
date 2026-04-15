@@ -3,187 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Trading Bot Dashboard</title>
+    <title>Crypto Trading Bot</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
+    <!-- Header -->
     <header>
-        <h1>Crypto Trading Bot</h1>
-        <div id="bot-status" class="status-badge">Loading...</div>
+        <div class="header-left">
+            <div class="logo">&#9670; CryptoBot</div>
+            <nav class="tabs">
+                <button class="tab active" data-tab="overview">Overview</button>
+                <button class="tab" data-tab="positions">Positions</button>
+                <button class="tab" data-tab="trades">Trades</button>
+                <button class="tab" data-tab="strategies">Strategies</button>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="refresh-indicator">
+                <span class="pulse-dot"></span>
+                <span id="last-update">--</span>
+            </div>
+            <div id="bot-status" class="mode-badge">--</div>
+        </div>
     </header>
 
     <main>
-        <!-- Portfolio Summary -->
-        <section class="card" id="portfolio-section">
-            <h2>Portfolio Summary</h2>
-            <div class="metrics-grid">
-                <div class="metric">
-                    <span class="metric-label">Total Value</span>
-                    <span class="metric-value" id="total-value">--</span>
+        <!-- ═══════ OVERVIEW TAB ═══════ -->
+        <div class="tab-content active" id="tab-overview">
+
+            <!-- Key Metrics Row -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--blue)">&#9632;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Total Value</span>
+                        <span class="kpi-value" id="total-value">--</span>
+                    </div>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">Available USDT</span>
-                    <span class="metric-value" id="available-usdt">--</span>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--cyan)">&#9679;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Available</span>
+                        <span class="kpi-value" id="available-usdt">--</span>
+                    </div>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">Daily PnL</span>
-                    <span class="metric-value" id="daily-pnl">--</span>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--green)">&#9650;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Today's PnL</span>
+                        <span class="kpi-value" id="daily-pnl">--</span>
+                    </div>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">Total PnL</span>
-                    <span class="metric-value" id="total-pnl">--</span>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--purple)">&#9733;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Total PnL</span>
+                        <span class="kpi-value" id="total-pnl">--</span>
+                    </div>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">Unrealized PnL</span>
-                    <span class="metric-value" id="unrealized-pnl">--</span>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--yellow)">&#8693;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Unrealized</span>
+                        <span class="kpi-value" id="unrealized-pnl">--</span>
+                    </div>
                 </div>
-                <div class="metric">
-                    <span class="metric-label">Open Positions</span>
-                    <span class="metric-value" id="num-positions">--</span>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="color: var(--text-secondary)">&#9638;</div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Positions</span>
+                        <span class="kpi-value" id="num-positions">--</span>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Open Positions -->
-        <section class="card" id="positions-section">
-            <h2>Open Positions</h2>
-            <table id="positions-table">
-                <thead>
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Side</th>
-                        <th>Entry</th>
-                        <th>Current</th>
-                        <th>Amount</th>
-                        <th>PnL</th>
-                        <th>PnL %</th>
-                        <th>Strategy</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="positions-body">
-                    <tr><td colspan="9" class="empty">No open positions</td></tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Strategy Status -->
-        <section class="card" id="strategies-section">
-            <h2>Strategies</h2>
-            <div class="strategies-grid" id="strategies-grid">
-                <div class="strategy-card" id="strategy-ai">
-                    <h3>AI Trading</h3>
-                    <div class="strategy-status">--</div>
-                    <button onclick="toggleStrategy('ai')">Toggle</button>
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="card chart-card wide">
+                    <div class="card-header">
+                        <h2>Equity Curve</h2>
+                        <div class="chart-controls">
+                            <button class="chip active" data-days="7">7D</button>
+                            <button class="chip" data-days="14">14D</button>
+                            <button class="chip" data-days="30">30D</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="equity-chart"></canvas>
+                    </div>
                 </div>
-                <div class="strategy-card" id="strategy-copy">
-                    <h3>Copy Trading</h3>
-                    <div class="strategy-status">--</div>
-                    <button onclick="toggleStrategy('copy')">Toggle</button>
-                </div>
-                <div class="strategy-card" id="strategy-signal">
-                    <h3>Signal Following</h3>
-                    <div class="strategy-status">--</div>
-                    <button onclick="toggleStrategy('signal')">Toggle</button>
+                <div class="card chart-card narrow">
+                    <div class="card-header">
+                        <h2>Strategy Mix</h2>
+                    </div>
+                    <div class="chart-wrap doughnut-wrap">
+                        <canvas id="strategy-chart"></canvas>
+                    </div>
+                    <div id="strategy-legend" class="chart-legend"></div>
                 </div>
             </div>
-        </section>
 
-        <!-- Recent Signals -->
-        <section class="card" id="signals-section">
-            <h2>Recent AI Signals</h2>
-            <table id="signals-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Symbol</th>
-                        <th>Action</th>
-                        <th>Confidence</th>
-                        <th>TA Score</th>
-                        <th>ML Score</th>
-                        <th>Acted On</th>
-                    </tr>
-                </thead>
-                <tbody id="signals-body">
-                    <tr><td colspan="7" class="empty">No signals yet</td></tr>
-                </tbody>
-            </table>
-        </section>
+            <!-- Risk & Quick Positions -->
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-header"><h2>Risk Status</h2></div>
+                    <div class="risk-grid">
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Position Usage</span>
+                                <span class="risk-val" id="risk-positions">--</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" id="risk-positions-bar" style="width:0%"></div></div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Daily Loss Limit</span>
+                                <span class="risk-val" id="risk-daily-pnl">--</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill warn" id="risk-daily-bar" style="width:0%"></div></div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Max Drawdown</span>
+                                <span class="risk-val" id="risk-drawdown">--</span>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill danger" id="risk-drawdown-bar" style="width:0%"></div></div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Cooldown</span>
+                                <span class="risk-val" id="risk-cooldown">--</span>
+                            </div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Peak Balance</span>
+                                <span class="risk-val" id="risk-peak">--</span>
+                            </div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="risk-top">
+                                <span class="risk-label">Loss Streak</span>
+                                <span class="risk-val" id="risk-streak">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Trade History -->
-        <section class="card" id="trades-section">
-            <h2>Trade History</h2>
-            <table id="trades-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Symbol</th>
-                        <th>Side</th>
-                        <th>Amount</th>
-                        <th>Price</th>
-                        <th>Cost</th>
-                        <th>PnL</th>
-                        <th>Strategy</th>
-                        <th>Mode</th>
-                    </tr>
-                </thead>
-                <tbody id="trades-body">
-                    <tr><td colspan="9" class="empty">No trades yet</td></tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Risk Status -->
-        <section class="card" id="risk-section">
-            <h2>Risk Management</h2>
-            <div class="metrics-grid" id="risk-metrics">
-                <div class="metric">
-                    <span class="metric-label">Positions</span>
-                    <span class="metric-value" id="risk-positions">--</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Daily PnL</span>
-                    <span class="metric-value" id="risk-daily-pnl">--</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Cooldown</span>
-                    <span class="metric-value" id="risk-cooldown">--</span>
-                </div>
-                <div class="metric">
-                    <span class="metric-label">Peak Balance</span>
-                    <span class="metric-value" id="risk-peak">--</span>
+                <div class="card">
+                    <div class="card-header"><h2>Open Positions</h2></div>
+                    <div id="positions-mini" class="positions-mini">
+                        <div class="empty-msg">No open positions</div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Manual Trade -->
-        <section class="card" id="manual-section">
-            <h2>Manual Trade</h2>
-            <form id="manual-trade-form" onsubmit="submitManualTrade(event)">
-                <div class="form-row">
-                    <select id="trade-symbol" required>
-                        <option value="BTC/USDT">BTC/USDT</option>
-                        <option value="ETH/USDT">ETH/USDT</option>
-                        <option value="SOL/USDT">SOL/USDT</option>
-                        <option value="BNB/USDT">BNB/USDT</option>
-                        <option value="XRP/USDT">XRP/USDT</option>
-                    </select>
-                    <select id="trade-side" required>
-                        <option value="buy">BUY</option>
-                        <option value="sell">SELL</option>
-                    </select>
-                    <input type="number" id="trade-amount" placeholder="Amount (USDT)" step="0.01" min="1" required>
-                    <button type="submit" class="btn-primary">Execute Trade</button>
+            <!-- Recent Trades -->
+            <div class="card">
+                <div class="card-header"><h2>Recent Trades</h2></div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Cost</th>
+                                <th>PnL</th>
+                                <th>Strategy</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-body-overview">
+                            <tr><td colspan="9" class="empty-cell">No trades yet</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-            </form>
-            <div id="trade-result"></div>
-        </section>
+            </div>
+        </div>
+
+        <!-- ═══════ POSITIONS TAB ═══════ -->
+        <div class="tab-content" id="tab-positions">
+            <div class="card">
+                <div class="card-header"><h2>Open Positions</h2></div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Entry Price</th>
+                                <th>Current Price</th>
+                                <th>Amount</th>
+                                <th>Value</th>
+                                <th>Unrealized PnL</th>
+                                <th>PnL %</th>
+                                <th>SL / TP</th>
+                                <th>Strategy</th>
+                                <th>Opened</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-body">
+                            <tr><td colspan="12" class="empty-cell">No open positions</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Manual Trade -->
+            <div class="card">
+                <div class="card-header"><h2>Place Manual Trade</h2></div>
+                <form id="manual-trade-form" onsubmit="submitManualTrade(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Symbol</label>
+                            <select id="trade-symbol" required>
+                                <option value="BTC/USDT">BTC/USDT</option>
+                                <option value="ETH/USDT">ETH/USDT</option>
+                                <option value="SOL/USDT">SOL/USDT</option>
+                                <option value="BNB/USDT">BNB/USDT</option>
+                                <option value="XRP/USDT">XRP/USDT</option>
+                                <option value="DOGE/USDT">DOGE/USDT</option>
+                                <option value="ADA/USDT">ADA/USDT</option>
+                                <option value="AVAX/USDT">AVAX/USDT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Side</label>
+                            <div class="side-toggle">
+                                <input type="radio" name="side" value="buy" id="side-buy" checked>
+                                <label for="side-buy" class="toggle-buy">BUY</label>
+                                <input type="radio" name="side" value="sell" id="side-sell">
+                                <label for="side-sell" class="toggle-sell">SELL</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (USDT)</label>
+                            <input type="number" id="trade-amount" placeholder="100.00" step="0.01" min="1" required>
+                        </div>
+                        <div class="form-group" style="align-self:flex-end">
+                            <button type="submit" class="btn-primary">Execute Trade</button>
+                        </div>
+                    </div>
+                </form>
+                <div id="trade-result" class="trade-result"></div>
+            </div>
+        </div>
+
+        <!-- ═══════ TRADES TAB ═══════ -->
+        <div class="tab-content" id="tab-trades">
+            <div class="card">
+                <div class="card-header"><h2>Trade History</h2></div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Cost</th>
+                                <th>Fee</th>
+                                <th>PnL</th>
+                                <th>Strategy</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-body-full">
+                            <tr><td colspan="10" class="empty-cell">No trades yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ STRATEGIES TAB ═══════ -->
+        <div class="tab-content" id="tab-strategies">
+            <div class="strategies-grid" id="strategies-grid"></div>
+
+            <!-- AI Signals -->
+            <div class="card">
+                <div class="card-header"><h2>Recent AI Signals</h2></div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Symbol</th>
+                                <th>Action</th>
+                                <th>Confidence</th>
+                                <th>TA Score</th>
+                                <th>ML Score</th>
+                                <th>Acted</th>
+                            </tr>
+                        </thead>
+                        <tbody id="signals-body">
+                            <tr><td colspan="7" class="empty-cell">No signals yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
-
-    <footer>
-        <p>Auto-refresh: <span id="refresh-countdown">15</span>s |
-        Last updated: <span id="last-update">--</span></p>
-    </footer>
 
     <script src="/static/app.js"></script>
 </body>
